@@ -18,7 +18,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/data-filteri
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home
+        cd ksql-recipes-try-it-at-home/data-filtering
         docker-compose up -d
 
 3. Run KSQL CLI:
