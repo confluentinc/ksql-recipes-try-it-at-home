@@ -77,16 +77,17 @@ services:
     volumes: 
       - $PWD:/data
 
-  kafkacat-from-net:
-    image: confluentinc/cp-kafkacat:latest
-    depends_on:
-      - kafka
-    command: 
-      - bash 
-      - -c 
-      - |
-        while [ 1 -eq 1 ]
-          do curl "https://api.mockaroo.com/api/d5a195e0?count=5000&key=ff7856d0" | \
-             awk '{print $$0;system("sleep 0.5");}' | \
-              kafkacat -b kafka:29092 -P -t purchases
-          done
+  # kafkacat-from-net:
+  # # kafkacat image doesn't have curl :( 
+  #   image: confluentinc/cp-kafkacat:latest
+  #   depends_on:
+  #     - kafka
+  #   command: 
+  #     - bash 
+  #     - -c 
+  #     - |
+  #       while [ 1 -eq 1 ]
+  #         do curl "https://api.mockaroo.com/api/d5a195e0?count=5000&key=ff7856d0" | \
+  #            awk '{print $$0;system("sleep 0.5");}' | \
+  #             kafkacat -b kafka:29092 -P -t purchases
+  #         done
