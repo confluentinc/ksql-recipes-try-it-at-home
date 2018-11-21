@@ -84,6 +84,8 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/data-filteri
 
 # Further reading: 
 
-* https://www.confluent.io/blog/real-time-syslog-processing-apache-kafka-ksql-part-1-filtering
-* https://www.confluent.io/blog/real-time-syslog-processing-with-apache-kafka-and-ksql-part-2-event-driven-alerting-with-slack/
-*  https://www.confluent.io/blog/real-time-syslog-processing-apache-kafka-ksql-enriching-events-with-external-data/
+* [Kafka Connect syslog connector](https://www.confluent.io/connector/kafka-connect-syslog/)
+* Blog series **We ❤️ syslogs: Real-time syslog Processing with Apache Kafka and KSQL**
+  * [Part 1: Filtering](https://www.confluent.io/blog/real-time-syslog-processing-apache-kafka-ksql-part-1-filtering)
+  * [Part 2: Event-Driven Alerting with Slack](https://www.confluent.io/blog/real-time-syslog-processing-with-apache-kafka-and-ksql-part-2-event-driven-alerting-with-slack/)
+  * [Part 3: Enriching events with external data](https://www.confluent.io/blog/real-time-syslog-processing-apache-kafka-ksql-enriching-events-with-external-data/)
