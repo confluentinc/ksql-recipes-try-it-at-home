@@ -64,4 +64,8 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/data-filteri
                 WINDOW TUMBLING (SIZE 5 MINUTES) \
           GROUP BY COUNTRY;
 
-        SELECT ROWKEY, COUNTRY, ORDER_COUNT, ORDER_TOTAL_USD FROM ORDERS_BY_COUNTRY_BY_5_MINS;
+        ksql> SELECT ROWKEY, COUNTRY, ORDER_COUNT, ORDER_TOTAL_USD FROM ORDERS_BY_COUNTRY_BY_5_MINS;
+
+        United States : Window{start=1542800400000 end=-} | United States | 193 | 960.8500000000001
+        Germany : Window{start=1542800400000 end=-} | Germany | 24 | 120.51000000000002
+        United Kingdom : Window{start=1542800400000 end=-} | United Kingdom | 16 | 64.64
