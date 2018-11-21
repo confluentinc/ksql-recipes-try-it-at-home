@@ -25,7 +25,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/data-filteri
 
         docker-compose exec ksql-cli ksql http://ksql-server:8088
 
-4. Register the existing `purchases` topic for use as a KSQL Stream called `purchases`: 
+4. Register the existing `user_logons` topic for use as a KSQL Stream called `user_logons`: 
 
         CREATE STREAM user_logons \
         (user STRUCT<\
