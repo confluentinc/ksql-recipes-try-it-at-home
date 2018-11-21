@@ -25,18 +25,21 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/data-filteri
 
         docker-compose exec ksql-cli ksql http://ksql-server:8088
 
-4. Register the existing `pageviews` topic for use as a KSQL Stream called `views`: 
+4. Register the existing `purchases` topic for use as a KSQL Stream called `purchases`: 
 
-        CREATE STREAM views (viewtime BIGINT, userid VARCHAR, pageid VARCHAR) WITH (KAFKA_TOPIC='pageviews', VALUE_FORMAT='JSON');
+        CREATE STREAM purchases \
+        (order_id INT, customer_name VARCHAR, date_of_birth VARCHAR, \
+        product VARCHAR, order_total_usd VARCHAR, town VARCHAR, country VARCHAR) \
+        WITH (KAFKA_TOPIC='purchases', VALUE_FORMAT='JSON');
 
-5. Inspect all the messages as they arrive: 
+5. Inspect the first few messages as they arrive: 
 
-        SELECT USERID, PAGEID FROM views;
+        SELECT * FROM PURCHASES LIMIT 5;
 
-6. Filter to show just those for `User_1`: 
+6. Filter to show just those where the country is `Germany`: 
 
-        SELECT USERID, PAGEID FROM views WHERE USERID='User_1';
+        SELECT ORDER_ID, PRODUCT, TOWN, COUNTRY FROM PURCHASES WHERE COUNTRY='Germany';
 
-7. Create a new Kafka topic with only messages for `User_1`: 
+7. Create a new KSQL stream containing just German orders: 
 
-        CREATE STREAM user1_views AS SELECT USERID, PAGEID FROM views WHERE USERID='User_1';
+        CREATE STREAM PUCHASES_GERMANY AS SELECT * FROM PURCHASES WHERE COUNTRY='Germany';
