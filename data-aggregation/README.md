@@ -1,4 +1,4 @@
-See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/data-filtering
+See https://www.confluent.io/stream-processing-cookbook/ksql-recipes/aggregating-data
 
 # Pre-reqs: 
 

@@ -1,4 +1,4 @@
-See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/data-filtering
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/nested-json-data
 
 # Pre-reqs: 
 
