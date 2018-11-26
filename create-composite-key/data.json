@@ -1,0 +1,5 @@
+{"site_id":1,"machine_id":42,"metric_id":1,"reading":42}
+{"site_id":1,"machine_id":42,"metric_id":2,"reading":41}
+{"site_id":1,"machine_id":42,"metric_id":3,"reading":43}
+{"site_id":1,"machine_id":44,"metric_id":4,"reading":44}
+{"site_id":2,"machine_id":44,"metric_id":4,"reading":44}
