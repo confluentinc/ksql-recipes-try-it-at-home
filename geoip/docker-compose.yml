@@ -1,0 +1,108 @@
+---
+version: '2'
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: "confluentinc/cp-zookeeper:5.0.1"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    container_name: kafka
+    image: "confluentinc/cp-enterprise-kafka:5.0.1"
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+
+  # schema-registry:
+  #   container_name: schema-registry
+  #   image: "confluentinc/cp-schema-registry:5.0.1"
+  #   depends_on:
+  #     - kafka
+  #   ports:
+  #     - '8081:8081'
+  #   environment:
+  #     SCHEMA_REGISTRY_HOST_NAME: schema-registry
+  #     SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+
+  ksql-server:
+    container_name: ksql-server  
+    image: confluentinc/cp-ksql-server:5.0.1
+    depends_on:
+      - kafka
+      # - schema-registry
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka:29092
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_EXTENSION_DIR: /data/udf-jars/
+      KSQL_FUNCTION_GETCITYFORIP_GEOLITE_DB_PATH: /data/maxmind
+      # KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      # KSQL_KSQL_SERVICE_ID: confluent_rmoff_01
+    volumes:
+      - $PWD/udfs:/data/udf-jars
+    command: 
+      - /bin/bash
+      - -c 
+      - |
+        mkdir -p /data/maxmind
+        cd /data/maxmind
+        curl https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz | tar xz 
+        mv GeoLite*/GeoLite2-City.mmdb .
+        /etc/confluent/docker/run 
+
+  ksql-cli:
+    container_name: ksql-cli
+    image: confluentinc/cp-ksql-cli:5.0.1
+    depends_on:
+      - ksql-server
+    entrypoint: /bin/sh
+    tty: true
+
+  kafkacat-from-file:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    command: 
+      - bash 
+      - -c 
+      - |
+        while [ 1 -eq 1 ]
+          do awk '{print $$0;system("sleep 0.5");}' /data/clicks.csv | \
+              kafkacat -b kafka:29092 -P -t clicks
+          done
+    volumes: 
+      - $PWD:/data
+
+  datagen:
+    image: confluentinc/ksql-examples:5.0.1
+    depends_on:
+      - kafka
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                       cub kafka-ready -b kafka:29092 1 300 && \
+                       echo Waiting a few seconds for topic creation to finish... && \
+                       sleep 20 && \
+                       ksql-datagen \
+                          bootstrap-server=kafka:29092 \
+                          quickstart=clickstream \
+                          format=json \
+                          topic=clickstream \
+                          maxInterval=20 \
+                          iterations=100'"
+    
