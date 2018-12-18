@@ -1,4 +1,4 @@
-See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/set-message-key
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/setting-kafka-message-key
 
 # Pre-reqs: 
 
@@ -21,7 +21,7 @@ Kafka messages are key/value pairs. The key is commonly used for partitioning an
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/set-message-key
+        cd ksql-recipes-try-it-at-home/setting-kafka-message-key
         docker-compose up -d
 
 3. Run KSQL CLI:

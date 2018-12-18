@@ -1,4 +1,4 @@
-See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/create-composite-key
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/creating-composite-key
 
 # Pre-reqs: 
 
@@ -27,7 +27,7 @@ In this example there is a stream of data from IoT devices, with several fields 
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/create-composite-key
+        cd ksql-recipes-try-it-at-home/creating-composite-key
         docker-compose up -d
 
 3. Run KSQL CLI:

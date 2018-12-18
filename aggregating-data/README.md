@@ -18,7 +18,7 @@ See https://www.confluent.io/stream-processing-cookbook/ksql-recipes/aggregating
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/data-aggregation
+        cd ksql-recipes-try-it-at-home/aggregating-data
         docker-compose up -d
 
 3. Run KSQL CLI:

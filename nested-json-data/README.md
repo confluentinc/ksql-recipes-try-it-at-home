@@ -18,7 +18,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/nested-json-
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/nested-data
+        cd ksql-recipes-try-it-at-home/nested-json-data
         docker-compose up -d
 
 3. Run KSQL CLI:

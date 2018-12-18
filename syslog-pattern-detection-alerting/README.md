@@ -18,7 +18,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/syslog-patte
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/syslog
+        cd ksql-recipes-try-it-at-home/syslog-pattern-detection-alerting
         docker-compose up -d
 
 3. Run KSQL CLI:
