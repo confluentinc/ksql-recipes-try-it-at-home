@@ -72,6 +72,7 @@ When defining a stream in KSQL against a topic with JSON data, there are some us
                 FROM my_stream \
         WHERE EXTRACTJSONFIELD(Header,'$.RecType') = 'RecA';
 
+    Note that the serialisation is being switched to Avro so that the schema is available automatically to any consumer, without having to manually declare it. 
 5. Observe the new stream has a schema and is populated continually with messages as they arrive in the original `source_data` topic: 
 
         ksql> DESCRIBE recA_data;
