@@ -1,0 +1,2 @@
+{ "Header": { "RecType": "RecA" }, "RAFld1": { "someFld": "some data", "someOtherField": 1.001 }, "RAFld2": { "aFld": "data", "anotherFld": 98.6 } }
+{ "Header": { "RecType": "RecB" }, "RBFld1": { "randomFld": "random data", "randomOtherField": 1.001 } }
