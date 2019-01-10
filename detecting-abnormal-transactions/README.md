@@ -32,7 +32,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
 
         docker-compose exec ksql-cli ksql http://ksql-server:8088
 
-4. Register the existing `suspicious-accounts` topic for use as a KSQL Table called `SUSPICIOUS_NAMES`:
+4. Register the existing `suspicious-accounts` topic for use as a KSQL Table called `SUSPICIOUS_NAMES`. 
 
         CREATE TABLE SUSPICIOUS_NAMES (CREATED_DATE VARCHAR, \
                                                 COMPANY_NAME VARCHAR, \
@@ -50,9 +50,11 @@ There will normally be a group of such transactions that occur within a 24-hour 
                       WITH (KAFKA_TOPIC = 'txns-1', \
                             VALUE_FORMAT = 'JSON');
 
-6. Inspect the data: 
+6. Set KSQL to process data from the beginning of each Kafka topic
 
-        ksql> SET 'auto.offset.reset'='earliest';
+        SET 'auto.offset.reset'='earliest';
+
+6. Inspect the data: 
 
         ksql> SELECT * FROM SUSPICIOUS_NAMES LIMIT 3;
         1547119341566 | verizon | 2017-09-15 09:08:38 | verizon | 1
