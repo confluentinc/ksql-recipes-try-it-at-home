@@ -1,0 +1,74 @@
+---
+version: '2'
+services:
+  zookeeper:
+    image: "confluentinc/cp-zookeeper:5.1.0"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: "confluentinc/cp-enterprise-kafka:5.1.0"
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+
+  # schema-registry:
+  #   image: "confluentinc/cp-schema-registry:5.1.0"
+  #   depends_on:
+  #     - kafka
+  #   ports:
+  #     - '8081:8081'
+  #   environment:
+  #     SCHEMA_REGISTRY_HOST_NAME: schema-registry
+  #     SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+
+  ksql-server:
+    image: confluentinc/cp-ksql-server:5.1.0
+    depends_on:
+      - kafka
+      # - schema-registry
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka:29092
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      # KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      # KSQL_KSQL_SERVICE_ID: confluent_rmoff_01
+
+  ksql-cli:
+    image: confluentinc/cp-ksql-cli:5.1.0
+    depends_on:
+      - ksql-server
+    entrypoint: /bin/sh
+    tty: true
+
+# Load test data 
+  kafkacat:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    command: 
+      - bash 
+      - -c 
+      - |
+        sleep 60
+        # load suspicious-accounts once
+        kafkacat -b kafka:29092 -P -t suspicious-accounts -K: -l /data/suspicious-accounts.json
+        # load valid-accounts once
+        kafkacat -b kafka:29092 -P -t valid-accounts -K: -l /data/valid-accounts.json
+        # Run scripts to generate transactions
+        /data/write-bad-transactions.sh
+        /data/write-good-transactions.sh
+    volumes: 
+      - $PWD:/data
+
