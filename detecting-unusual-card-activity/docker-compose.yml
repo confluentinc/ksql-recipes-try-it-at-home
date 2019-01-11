@@ -28,6 +28,29 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'false'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+    command: 
+      - bash 
+      - -c 
+      - |
+        rm /data/kafka-is-up
+        # Launch Kafka
+        /etc/confluent/docker/run &
+        # Wait for Kafka to start and then create a file to 
+        # indicate that it's listening
+        echo "Waiting for Kafka to start listening on 9092 ⏳"
+        nc -vz localhost 9092
+        is_up=$$?
+        while [ $$is_up -ne 0 ] ; do 
+          echo -e $$(date) $$(nc -z localhost 9092)
+          nc -vz localhost 9092
+          is_up=$$?
+          sleep 5 
+        done
+        echo "Kakfa is now listening! :-)"
+        touch /data/kafka-is-up
+        sleep infinity
+    volumes:
+      - up-flag:/data
 
   schema-registry:
     image: "confluentinc/cp-schema-registry:5.1.0"
@@ -57,6 +80,29 @@ services:
     entrypoint: /bin/sh
     tty: true
 
+  kafkacat-txns:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    command: 
+      - bash 
+      - -c 
+      - |
+        echo "Waiting for flag that Kafka is up… ⏳"
+        until [ -f /data/flags/kafka-is-up ]
+        do
+            echo -e $$(date) ": Waiting for flag that Kafka is up… ⏳"
+            sleep 5
+        done
+        echo -e $$(date) ": \o/ Got the flag that Kafka is up!"
+        while [ 1 -eq 1 ]
+          do awk '{print $$0;system("sleep 0.5");}' /data/transactions.json | \
+              kafkacat -b kafka:29092 -P -t transactions 
+          done
+    volumes: 
+      - $PWD:/data
+      - up-flag:/data/flags
+
   kafkacat-customers:
     image: confluentinc/cp-kafkacat:latest
     depends_on:
@@ -65,25 +111,21 @@ services:
       - bash 
       - -c 
       - |
+        echo "Waiting for flag that Kafka is up… ⏳"
+        until [ -f /data/flags/kafka-is-up ]
+        do
+            echo -e $$(date) ": Waiting for flag that Kafka is up… ⏳"
+            sleep 5
+        done
+        echo -e $$(date) ": \o/ Got the flag that Kafka is up!"
         while [ 1 -eq 1 ]
-          do awk '{print $$0;system("sleep 0.5");}' /data/customers.json | \
+          do awk '{print $$0;}' /data/customers.json | \
               kafkacat -b kafka:29092 -P -t customers
           done
     volumes: 
       - $PWD:/data
-
-  kafkacat-transactions:
-    image: confluentinc/cp-kafkacat:latest
-    depends_on:
-      - kafka
-    command: 
-      - bash 
-      - -c 
-      - |
-        while [ 1 -eq 1 ]
-          do awk '{print $$0;system("sleep 0.5");}' /data/transactions.json | \
-              kafkacat -b kafka:29092 -P -t transactions
-          done
-    volumes: 
-      - $PWD:/data
+      - up-flag:/data/flags
+      
+volumes:
+    up-flag: {}
       
