@@ -121,7 +121,7 @@ ksql> LIST TOPICS;
  user_logons_flat   | true       | 4          | 1                  | 0         | 0
 ----
 +
-The contents of the topic can be viewed by any Kafka client, or simply with `PRINT from KSQL: 
+The contents of the topic can be viewed by any Kafka client, or simply with `PRINT` from KSQL: 
 +
 [source,sql]
 ----
