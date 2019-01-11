@@ -1,0 +1,149 @@
+= Detecting Unusual Credit Card Activity
+
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/detecting-unusual-card-activity
+
+== Introduction
+
+In this recipe, we aggregate credit card transactions for each customer over a 2 hour period and join it with the customer’s average credit card spend. If the total credit card spend over the past 2 hours is more than the average credit card usage of a customer, the account will be flagged as a possible case of credit card theft. 
+
+== Pre-reqs: 
+
+* Docker
+* If running on Mac/Windows, at least 4GB allocated to Docker: 
++
+[source,bash]
+----
+docker system info | grep Memory 
+----
++
+_Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
+
+
+== Try it at home!
+
+Minimum version is Confluent Platform 5.0
+
+1. Clone this repository
++
+[source,bash]
+----
+git clone https://github.com/confluentinc/ksql-recipes-try-it-at-home.git
+----
+
+2. Launch: 
++
+[source,bash]
+----
+cd ksql-recipes-try-it-at-home/detecting-unusual-card-activity
+docker-compose up -d
+----
+
+3. Run KSQL CLI:
++
+[source,bash]
+----
+docker-compose exec ksql-cli ksql http://ksql-server:8088
+----
+
+4. Register the existing `transactions` topic as a KSQL stream:
++
+[source,sql]
+----
+CREATE STREAM TRANSACTIONS_RAW (ACCOUNT_ID VARCHAR, \
+                                TIMESTAMP VARCHAR, \
+                                CARD_TYPE VARCHAR, \
+                                AMOUNT DOUBLE, \
+                                IP_ADDRESS VARCHAR, \
+                                TRANSACTION_ID VARCHAR) \
+                           WITH (KAFKA_TOPIC='transactions',\
+                                 VALUE_FORMAT='JSON');
+----
+
+5. Re-partition the stream on `account_id`, and use Avro for the target stream (this is optional): 
++
+[source,sql]
+----
+CREATE STREAM TRANSACTIONS_SOURCE \
+    WITH (VALUE_FORMAT='AVRO') AS \
+          SELECT * \
+            FROM TRANSACTIONS_RAW \
+    PARTITION BY ACCOUNT_ID;
+----
+
+6. Register the existing stream of customer data from Oracle in the topic `customers` as a KSQL stream: 
++
+[source,sql]
+----
+CREATE STREAM CUST_RAW_STREAM (ID BIGINT, \
+                               FIRST_NAME VARCHAR, \
+                               LAST_NAME VARCHAR, \
+                               EMAIL VARCHAR, \
+                               AVG_CREDIT_SPEND DOUBLE) \
+              WITH (KAFKA_TOPIC='customers', \
+                    VALUE_FORMAT='JSON');
+----
+
+
+7. Re-partition the customer data stream by `account_id` to prepare for the join, and use Avro for the target stream (this is optional):
++
+[source,sql]
+----
+CREATE STREAM CUSTOMER_REKEYED \
+    WITH (VALUE_FORMAT='AVRO') AS \
+            SELECT * \
+              FROM CUST_RAW_STREAM \
+      PARTITION BY ID;
+----
+
+8. Register the partitioned customer data topic as a KSQL Table used for the join with the incoming stream of transactions:
++
+[source,sql]
+----
+CREATE TABLE customer \
+WITH (KAFKA_TOPIC='CUSTOMER_REKEYED', \
+      VALUE_FORMAT='AVRO', \
+      KEY='ID');
+----
+
+9. Aggregate the stream of transactions for each account ID using a 2 hour tumbling window:
++
+[source,sql]
+----
+CREATE TABLE ACCOUNT_TRANSACTIONS_AGG_2HR AS \
+  SELECT   TIMESTAMPTOSTRING(WindowStart(), 'yyyy-MM-dd HH:mm:ss Z') AS WINDOW_START, \
+           T.ACCOUNT_ID, T.CARD_TYPE, SUM(T.AMOUNT) AS TOTAL_CREDIT_SPEND \
+  FROM     TRANSACTIONS_SOURCE T \
+           WINDOW TUMBLING (SIZE 2 HOURS) \
+  GROUP BY T.ACCOUNT_ID, T.CARD_TYPE;
+----
++
+Expose this as a stream for join purposes: 
++
+[source,sql]
+----
+CREATE STREAM ACCOUNT_TRANSACTIONS_AGG_2HR_STREAM WITH (KAFKA_TOPIC='ACCOUNT_TRANSACTIONS_AGG_2HR', VALUE_FORMAT='AVRO');
+
+CREATE STREAM ACCOUNT_TRANSACTIONS_AGG_2HR_STREAM_REKEY AS SELECT * FROM ACCOUNT_TRANSACTIONS_AGG_2HR_STREAM PARTITION BY ACCOUNT_ID;
+----
+
+10. Join it with customer table to find accounts where the total spend in a 30 second window is greater than the customer's average spend.
++
+[source,sql]
+----
+CREATE STREAM POSSIBLE_STOLEN_CARD AS \
+  SELECT T.WINDOW_START AS WINDOW_START, \
+         T.ACCOUNT_ID, T.CARD_TYPE, \
+         T.TOTAL_CREDIT_SPEND, C.AVG_CREDIT_SPEND, \
+         C.FIRST_NAME + ' ' + C.LAST_NAME AS FULL_NAME \
+  FROM ACCOUNT_TRANSACTIONS_AGG_2HR_STREAM_REKEY T \
+       INNER JOIN CUSTOMER C \
+        ON T.ACCOUNT_ID=C.ID \
+  WHERE T.TOTAL_CREDIT_SPEND > C.AVG_CREDIT_SPEND ;
+----
++
+Examine the output: 
++
+[source,sql]
+----
+SELECT * FROM POSSIBLE_STOLEN_CARD
+----
