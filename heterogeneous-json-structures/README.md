@@ -1,6 +1,8 @@
+# Heterogeneous JSON Structures
+
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/heterogeneous-json-structures/
 
-# Pre-reqs: 
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -9,7 +11,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/heterogeneou
 
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
-# Intro
+## Introduction
 
 Sometimes the messages on a Kafka topic will not have the same structure. For example: 
 
@@ -25,8 +27,7 @@ When defining a stream in KSQL against a topic with JSON data, there are some us
 * Use `STRUCT` for nested fields if you want to declare the schema for the contents too
 * You can use `VARCHAR` against the parent element of a nested field, and then `EXTRACTJSONFIELDFIELD` function to access nested fields at execution time
 
-
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 
@@ -91,3 +92,4 @@ When defining a stream in KSQL against a topic with JSON data, there are some us
 
         ksql> SELECT * FROM recA_data;
         1545240188787 | null | 1.001 | some data | data | 98.6
+        

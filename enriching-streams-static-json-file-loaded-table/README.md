@@ -1,6 +1,8 @@
+# Enriching Streams with Static Data Loaded as a Table
+
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/enriching-streams-static-json-file-loaded-table
 
-# Pre-reqs: 
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -10,7 +12,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/enriching-st
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
 
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 

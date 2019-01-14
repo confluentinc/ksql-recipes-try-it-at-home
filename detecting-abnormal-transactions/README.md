@@ -1,13 +1,15 @@
+# Detecting Abnormal Transactions
+
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/detecting-abnormal-transactions
 
-# Introduction
+## Introduction
 
 A common pattern for fraudsters is to disguise transactions within an account that references a set of popular organizations, the idea being that that chances of them being recognized is very low. For example, transactions labeled Verizon, Citibank, USPS, etc., are likely to look similar and blend in.
 
 There will normally be a group of such transactions that occur within a 24-hour period, where they are all new—that is, they have not been seen within the last 30 days. When it comes to fraud detection, financial institutions will categorize this behavior as unusual and alert their fraud team to investigate immediately to block the offending card.
 
 
-# Pre-reqs: 
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -17,7 +19,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
 
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 

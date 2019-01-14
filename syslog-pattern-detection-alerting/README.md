@@ -1,6 +1,8 @@
+# Processing Syslog Data: Pattern Detection and Alerting
+
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/syslog-pattern-detection-alerting
 
-# Pre-reqs: 
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -10,7 +12,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/syslog-patte
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
 
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 
@@ -82,7 +84,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/syslog-patte
         SYSLOG_SSHD_BRUTEFORCE_ATTACK | true       | 4          | 1                  | 0         | 0
 
 
-# Further reading: 
+## Further reading: 
 
 * [Kafka Connect syslog connector](https://www.confluent.io/connector/kafka-connect-syslog/)
 * Blog series **We ❤️ syslogs: Real-time syslog Processing with Apache Kafka and KSQL**

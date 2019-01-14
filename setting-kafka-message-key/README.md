@@ -1,6 +1,8 @@
+# Setting the Kafka Message Key
+
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/setting-kafka-message-key
 
-# Pre-reqs: 
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -9,11 +11,11 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/setting-kafk
 
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
-# Setting Kafka message key using KSQL
+## Introduction
 
 Kafka messages are key/value pairs. The key is commonly used for partitioning and is particularly important if modeling a Kafka topic as a table in KSQL (or KTable in Kafka Streams) for query or join purposes. It is often a requirement to take data in a Kafka topic and create a derived version that includes a key based on a field within the message payload itself. This could be where the data needs a key other than that which has been set, or where the producing application hasn't set any key. An example of the latter is the JDBC connector for Kafka Connect.
 
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 

@@ -1,0 +1,21 @@
+= KSQL Recipes - try it at home!
+
+image::images/ksql-rocket.svg[KSQL Rocket]
+
+This repository contains all you need to try out the KSQL recipes yourself. All you need is Docker and Docker Compose! Each recipe includes the full details on how to run it. 
+
+* link:aggregating-data[Aggregating Data]
+* link:atm-fraud-detection[ATM Fraud Detection]
+* link:calculating-bus-delay-time[Calculating Bus Delay Time]
+* link:creating-composite-key[Creating a Composite Key]
+* link:data-filtering[Data Filtering]
+* link:data-masking[Data Masking]
+* link:detecting-abnormal-transactions[Detecting Abnormal Transactions]
+* link:detecting-unusual-card-activity[Detecting Unusual Credit Card Activity]
+* link:enriching-streams-static-json-file-loaded-table[Enriching Streams with Static Data Loaded as a Table]
+* link:flattening-json-messages[Flattening JSON Messages with KSQL]
+* link:heterogeneous-json-structures[Heterogeneous JSON Structures]
+* link:nested-json-data[Working with Nested JSON Data]
+* link:setting-kafka-message-key[Setting the Kafka Message Key]
+* link:syslog-pattern-detection-alerting[Processing Syslog Data: Pattern Detection and Alerting]
+
