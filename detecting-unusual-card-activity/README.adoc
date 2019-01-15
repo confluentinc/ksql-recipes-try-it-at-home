@@ -4,7 +4,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/detecting-un
 
 == Introduction
 
-In this recipe, we aggregate credit card transactions for each customer over a 2 hour period and join it with the customer’s average credit card spend. If the total credit card spend over the past 2 hours is more than the average credit card usage of a customer, the account will be flagged as a possible case of credit card theft. 
+In this recipe, we aggregate credit card transactions for each customer over a two-hour period and join it with the customer’s average credit card spend. If the total credit card spend over the past two hours is more than the average credit card usage of a customer, the account will be flagged as a possible case of credit card theft. 
 
 == Pre-reqs: 
 
@@ -59,7 +59,7 @@ CREATE STREAM TRANSACTIONS_RAW (ACCOUNT_ID VARCHAR, \
                                  VALUE_FORMAT='JSON');
 ----
 
-5. Re-partition the stream on `account_id`, and use Avro for the target stream (this is optional): 
+5. Repartition the stream on `account_id`, and use Avro for the target stream (this is optional): 
 +
 [source,sql]
 ----
@@ -84,7 +84,7 @@ CREATE STREAM CUST_RAW_STREAM (ID BIGINT, \
 ----
 
 
-7. Re-partition the customer data stream by `account_id` to prepare for the join, and use Avro for the target stream (this is optional):
+7. Repartition the customer data stream by `account_id` to prepare for the join, and use Avro for the target stream (this is optional):
 +
 [source,sql]
 ----
@@ -95,7 +95,7 @@ CREATE STREAM CUSTOMER_REKEYED \
       PARTITION BY ID;
 ----
 
-8. Register the partitioned customer data topic as a KSQL Table used for the join with the incoming stream of transactions:
+8. Register the partitioned customer data topic as a KSQL table used for the join with the incoming stream of transactions:
 +
 [source,sql]
 ----
@@ -105,7 +105,7 @@ WITH (KAFKA_TOPIC='CUSTOMER_REKEYED', \
       KEY='ID');
 ----
 
-9. Join the transactions to customer information
+9. Join the transactions to customer information:
 +
 [source,sql]
 ----
@@ -118,7 +118,7 @@ FROM     TRANSACTIONS_SOURCE T \
           ON T.ACCOUNT_ID = C.ID;
 ----
 
-10. Aggregate the stream of transactions for each account ID using a 2 hour tumbling window, and filter for accounts in which the total spend in a two hour period is greater than the customer's average
+10. Aggregate the stream of transactions for each account ID using a two-hour tumbling window, and filter for accounts in which the total spend in a two-hour period is greater than the customer's average:
 +
 [source,sql]
 ----
