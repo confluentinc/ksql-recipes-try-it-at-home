@@ -1,4 +1,4 @@
-= Flattening JSON Messages with KSQL
+= Flattening JSON Messages 
 
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/flattening-json-messages
 
@@ -71,7 +71,7 @@ docker-compose up -d
 docker-compose exec ksql-cli ksql http://ksql-server:8088
 ----
 
-4. Register the existing `user_logons` topic for use as a KSQL Stream called `user_logons`. Note the `STRUCT` data type for the nested field: 
+4. Register the existing `user_logons` topic for use as a KSQL stream called `user_logons`. Note the `STRUCT` data type for the nested field: 
 +
 [source,sql]
 ----
