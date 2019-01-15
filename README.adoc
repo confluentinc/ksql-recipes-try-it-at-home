@@ -7,6 +7,7 @@ This repository contains all you need to try out the KSQL recipes yourself. All 
 * link:aggregating-data[Aggregating Data]
 * link:atm-fraud-detection[ATM Fraud Detection]
 * link:calculating-bus-delay-time[Calculating Bus Delay Time]
+* link:counting-messages-in-a-topic[Counting messages in a topic]
 * link:creating-composite-key[Creating a Composite Key]
 * link:data-filtering[Data Filtering]
 * link:data-masking[Data Masking]
