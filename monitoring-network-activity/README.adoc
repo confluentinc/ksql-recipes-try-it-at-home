@@ -1,0 +1,150 @@
+= Monitoring Network Activity by User
+
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/monitoring-network-activity
+
+== Introduction
+
+This recipe is an example of how to process PCAP data to target machines by MAC address. It creates a stream that can trigger an alert any time a targeted system is the source in a PCAP stream, where packets are being captured and sent to Kafka. 
+
+== Pre-reqs: 
+
+* Docker
+* If running on Mac/Windows, at least 4GB allocated to Docker: 
++
+[source,bash]
+----
+docker system info | grep Memory 
+----
++
+_Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
+
+
+== Try it at home!
+
+Minimum version is Confluent Platform 5.0
+
+1. Clone this repository
++
+[source,bash]
+----
+git clone https://github.com/confluentinc/ksql-recipes-try-it-at-home.git
+----
+
+2. Launch: 
++
+[source,bash]
+----
+cd ksql-recipes-try-it-at-home/monitoring-network-activity
+docker-compose up -d
+----
+
+3. Run KSQL CLI:
++
+[source,bash]
+----
+docker-compose exec ksql-cli ksql http://ksql-server:8088
+----
+
+4. Create a table on the `employees` Kafka topic:
++
+[source,sql]
+----
+CREATE TABLE employee_t \
+            (key       VARCHAR, \
+            name       VARCHAR, \
+            watch_flag VARCHAR) \
+      WITH (KAFKA_TOPIC ='employees', \
+            VALUE_FORMAT ='JSON', \
+            KEY='key');
+----
+
+5. Create a table on the `computers` Kafka topic: 
++
+[source,sql]
+----
+CREATE TABLE computer_t \
+            (comp_id INT, \
+            empkey   VARCHAR, \
+            macaddr  VARCHAR) \
+      WITH (KAFKA_TOPIC='computers', \
+            VALUE_FORMAT='JSON', \
+            KEY='empkey');
+----
+
+5. So that any processing is done on the existing contents of a Kafka topic, not just new records, set the `offset` to earliest:
++
+[source,sql]
+----
+SET 'auto.offset.reset' = 'earliest';
+----
+
+6. Create a new table showing the computer details for each employee who has been put on a 'watch list'. 
++
+_Note that table-table joins are https://github.com/confluentinc/ksql/issues/1559[currently] 1:1, not 1:N._
++
+[source,sql]
+----
+CREATE TABLE COMP_WATCH_BY_EMP_ID_T WITH (PARTITIONS=1, \
+                                VALUE_FORMAT='AVRO') AS \
+      SELECT e.key     AS EMP_ID,   \
+             e.NAME    AS EMP_NAME, \
+             e.key     AS EMP_KEY,  \
+             c.macaddr AS MACADDR   \
+      FROM computer_t c \
+            INNER JOIN employee_t e \
+            ON c.empkey = e.key \
+      WHERE e.watch_flag='YES';
+----
+
+7. We will be joining the `COMP_WATCH_T` table to a stream of events using the common key of `MACADDR`. The table currently is keyed on the key that was using in the join—employee ID. We need to re-key the data on `MACADDR` instead.
++
+[source,sql]
+----
+CREATE STREAM COMP_WATCH_BY_EMP_ID_S WITH (VALUE_FORMAT='AVRO',KAFKA_TOPIC='COMP_WATCH_BY_EMP_ID_T');
+
+CREATE STREAM COMP_WATCH_BY_MACADDR_S WITH (PARTITIONS=1) AS \
+      SELECT * FROM COMP_WATCH_BY_EMP_ID_S \
+      PARTITION BY MACADDR;
+
+CREATE TABLE COMP_WATCH_BY_MACADDR_T WITH (VALUE_FORMAT='AVRO', \
+                                           KEY='MACADDR',\
+                                           KAFKA_TOPIC='COMP_WATCH_BY_MACADDR_S');
+----
+
+8. Optionally, inspect the two tables, and observe that they are the same except differ on key: 
++
+[source,sql]
+----
+DESCRIBE EXTENDED COMP_WATCH_BY_EMP_ID_T;
+DESCRIBE EXTENDED COMP_WATCH_BY_MACADDR_T;
+----
+
+9. Register a KSQL stream on the `pcap` Kafka topic. The schema has many columns; only a subset are declared here. This is a valid approach to take with KSQL, and it will just ignore columns that are not declared. 
++
+[source,sql]
+----
+CREATE STREAM PCAP (_index VARCHAR, \
+                    _type VARCHAR, \
+                    _score VARCHAR, \
+                    _source STRUCT< \
+                        layers STRUCT< \
+                            frame STRUCT< \
+                                encap_type VARCHAR, \
+                                time VARCHAR, \
+                                offset_shift VARCHAR, \
+                                time_epoch VARCHAR, \
+                                time_delta VARCHAR, \
+                                time_delta_displayed VARCHAR, \
+                                bootp_dhcp VARCHAR, \
+                                bootp_cookie VARCHAR, \
+                                bootp_option_type VARCHAR, \
+                                bootp_option_type_tree STRUCT< \
+                                    bootp_option_end VARCHAR>, \
+                                bootp_option_padding VARCHAR> \
+                          > \
+                      > )  \
+              WITH (KAFKA_TOPIC='pcap', \
+              VALUE_FORMAT='JSON');
+----
+
+10. 
