@@ -5,7 +5,8 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/calculating-
 == Introduction
 
 Many events happen on a time schedule where there is a scheduled time of arrival and an actual time of arrival. With these two data points, you are able to track the amount of time in which your event was delayed. By tracking this, you can better predict future delays and monitor your real-time progress. 
-In this example, we will use buses to demonstrate how we can calculate in real-time the delays for every bus as it executes its route. After loading your static bus schedule into a KTable, you can then populate a live feed showing the number of minutes a bus is delayed from its expected course.
+
+In this example, we will use buses to demonstrate how we can calculate in real time the delays for every bus as it executes its route. After loading your static bus schedule into a KTable, you can then populate a live feed showing the number of minutes a bus is delayed from its expected course.
 
 
 == Pre-reqs: 
@@ -47,7 +48,7 @@ docker-compose up -d
 docker-compose exec ksql-cli ksql http://ksql-server:8088
 ----
 
-4. The bus schedule with expected arrival times is held as JSON data on a Kafka topic, with the ETA stored as a Unix timestamp. Register a KSQL Table on this topic: 
+4. The bus schedule with expected arrival times is held as JSON data on a Kafka topic, with the ETA stored as a Unix timestamp. Register a KSQL table on this topic: 
 +
 [source,sql]
 ----
@@ -59,7 +60,7 @@ CREATE TABLE BUS_SCHEDULE (ROUTE_ID INTEGER, \
                           KEY='STOP_NUM');
 ----
 
-5. As buses complete their routes, they send events detailing the Unix timestamp of their arrival at a stop to a Kafka topic. Register this topic as a KSQL Stream: 
+5. As buses complete their routes, they send events detailing the Unix timestamp of their arrival at a stop to a Kafka topic. Register this topic as a KSQL stream: 
 +
 [source,sql]
 ----
