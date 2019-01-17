@@ -4,6 +4,8 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/monitoring-n
 
 == Introduction
 
+
+
 This recipe is an example of how to process PCAP data to target machines by MAC address. It creates a stream that can trigger an alert any time a targeted system is the source in a PCAP stream, where packets are being captured and sent to Kafka. 
 
 == Pre-reqs: 
@@ -71,11 +73,15 @@ CREATE TABLE computer_t \
             KEY='empkey');
 ----
 
-5. So that any processing is done on the existing contents of a Kafka topic, not just new records, set the `offset` to earliest:
+5. Change a couple of system settings: 
++
+* Any processing is to done on the existing contents of a Kafka topic, not just new records
+* When creating target topic, use one partition instead of the default four
 +
 [source,sql]
 ----
 SET 'auto.offset.reset' = 'earliest';
+SET 'ksql.sink.partitions'='1';
 ----
 
 6. Create a new table showing the computer details for each employee who has been put on a 'watch list'. 
@@ -102,49 +108,178 @@ CREATE TABLE COMP_WATCH_BY_EMP_ID_T WITH (PARTITIONS=1, \
 ----
 CREATE STREAM COMP_WATCH_BY_EMP_ID_S WITH (VALUE_FORMAT='AVRO',KAFKA_TOPIC='COMP_WATCH_BY_EMP_ID_T');
 
-CREATE STREAM COMP_WATCH_BY_MACADDR_S WITH (PARTITIONS=1) AS \
+CREATE STREAM COMP_WATCH_BY_MACADDR_S AS \
       SELECT * FROM COMP_WATCH_BY_EMP_ID_S \
       PARTITION BY MACADDR;
-
-CREATE TABLE COMP_WATCH_BY_MACADDR_T WITH (VALUE_FORMAT='AVRO', \
-                                           KEY='MACADDR',\
-                                           KAFKA_TOPIC='COMP_WATCH_BY_MACADDR_S');
 ----
-
-8. Optionally, inspect the two tables, and observe that they are the same except differ on key: 
++
+Verify that data is flowing to the new `COMP_WATCH_BY_MACADDR_S` stream: 
 +
 [source,sql]
 ----
-DESCRIBE EXTENDED COMP_WATCH_BY_EMP_ID_T;
-DESCRIBE EXTENDED COMP_WATCH_BY_MACADDR_T;
+SELECT * FROM COMP_WATCH_BY_MACADDR_S LIMIT 1;
+----
++
+[source,sql]
+----
+CREATE TABLE COMP_WATCH_BY_MACADDR_T WITH (VALUE_FORMAT='AVRO', \
+                                           KEY='MACADDR',\
+                                           KAFKA_TOPIC='COMP_WATCH_BY_MACADDR_S');
 ----
 
 9. Register a KSQL stream on the `pcap` Kafka topic. The schema has many columns; only a subset are declared here. This is a valid approach to take with KSQL, and it will just ignore columns that are not declared. 
 +
 [source,sql]
 ----
-CREATE STREAM PCAP (_index VARCHAR, \
-                    _type VARCHAR, \
-                    _score VARCHAR, \
-                    _source STRUCT< \
-                        layers STRUCT< \
-                            frame STRUCT< \
-                                encap_type VARCHAR, \
-                                time VARCHAR, \
-                                offset_shift VARCHAR, \
-                                time_epoch VARCHAR, \
-                                time_delta VARCHAR, \
-                                time_delta_displayed VARCHAR, \
-                                bootp_dhcp VARCHAR, \
-                                bootp_cookie VARCHAR, \
-                                bootp_option_type VARCHAR, \
-                                bootp_option_type_tree STRUCT< \
-                                    bootp_option_end VARCHAR>, \
-                                bootp_option_padding VARCHAR> \
-                          > \
-                      > )  \
-              WITH (KAFKA_TOPIC='pcap', \
-              VALUE_FORMAT='JSON');
+CREATE STREAM PCAP (_index VARCHAR,                                  \
+                    _type VARCHAR,                                   \
+                    _score VARCHAR,                                  \
+                    _source STRUCT<                                  \
+                        layers STRUCT<                               \
+                            frame STRUCT<                            \
+                                encap_type VARCHAR,                  \
+                                time VARCHAR,                        \
+                                offset_shift VARCHAR,                \
+                                time_epoch VARCHAR,                  \
+                                time_delta VARCHAR,                  \
+                                time_delta_displayed VARCHAR,        \
+                                time_relative VARCHAR,               \
+                                number VARCHAR,                      \
+                                len VARCHAR,                         \
+                                cap_len VARCHAR,                     \
+                                marked VARCHAR,                      \
+                                ignored VARCHAR,                     \
+                                protocols VARCHAR>,                  \
+                            eth STRUCT<                              \
+                                dst VARCHAR,                         \
+                                dst_tree STRUCT<                     \
+                                    dst_resolved VARCHAR,            \
+                                    addr VARCHAR,                    \
+                                    addr_resolved VARCHAR,           \
+                                    lg VARCHAR,                      \
+                                    ig VARCHAR>,                     \
+                                src VARCHAR,                         \
+                                src_tree STRUCT<                     \
+                                    src_resolved VARCHAR,            \
+                                    addr VARCHAR,                    \
+                                    addr_resolved VARCHAR,           \
+                                    lg VARCHAR,                      \
+                                    ig VARCHAR>,                     \
+                                type VARCHAR>,                       \
+                            ip STRUCT<                               \
+                                version VARCHAR,                     \
+                                hdr_len VARCHAR,                     \
+                                dsfield VARCHAR,                     \
+                                dsfield_tree STRUCT<                 \
+                                    dscp VARCHAR,                    \
+                                    ecn VARCHAR>,                    \
+                                len VARCHAR,                         \
+                                id VARCHAR,                          \
+                                flags VARCHAR,                       \
+                                flags_tree STRUCT<                   \
+                                    rb VARCHAR,                      \
+                                    df VARCHAR,                      \
+                                    mf VARCHAR,                      \
+                                    frag_offset VARCHAR>,            \
+                                ttl VARCHAR,                         \
+                                proto VARCHAR,                       \
+                                checksum VARCHAR,                    \
+                                status VARCHAR,                      \
+                                src VARCHAR,                         \
+                                addr VARCHAR,                        \
+                                src_host VARCHAR,                    \
+                                host VARCHAR,                        \
+                                dst VARCHAR,                         \
+                                dst_host VARCHAR>,                   \
+                            udp STRUCT<                              \
+                                srcport VARCHAR,                     \
+                                dstport VARCHAR,                     \
+                                port VARCHAR,                        \
+                                length VARCHAR,                      \
+                                checksum VARCHAR,                    \
+                                status VARCHAR,                      \
+                                stream_ VARCHAR>,                    \
+                            bootp STRUCT<                            \
+                                bootp_type VARCHAR,                  \
+                                bootp_len VARCHAR,                   \
+                                bootp_hops VARCHAR,                  \
+                                bootp_id VARCHAR,                    \
+                                bootp_secs VARCHAR,                  \
+                                bootp_flags VARCHAR,                 \
+                                bootp_flags_tree STRUCT<             \
+                                    bootp_bc VARCHAR,                \
+                                    bootp_reserved VARCHAR>,         \
+                                bootp_client VARCHAR,                \
+                                bootp_your VARCHAR,                  \
+                                bootp_server VARCHAR,                \
+                                bootp_relay VARCHAR,                 \
+                                bootp_mac_addr VARCHAR,              \
+                                bootp_addr_padding VARCHAR,          \
+                                bootp_file VARCHAR,                  \
+                                bootp_dhcp VARCHAR,                  \
+                                bootp_cookie VARCHAR,                \
+                                bootp_option_type VARCHAR,           \
+                                bootp_option_type_tree STRUCT<       \
+                                    bootp_option_end VARCHAR>,       \
+                                bootp_option_padding VARCHAR>        \
+                            >                                        \
+                        > )                                          \
+                WITH (KAFKA_TOPIC='pcap',                            \
+                      VALUE_FORMAT='JSON');
 ----
 
-10. 
+10. Flatten the PCAP data, using just the particular fields of interest: 
++
+[source,sql]
+----
+CREATE STREAM PCAP_FLAT WITH (VALUE_FORMAT='AVRO')    AS             \
+      SELECT _SOURCE -> LAYERS -> FRAME -> TIME       AS FRAME_TIME, \
+             _SOURCE -> LAYERS -> FRAME -> LEN        AS FRAME_LEN,  \
+             _SOURCE -> LAYERS -> FRAME -> PROTOCOLS  AS FRAME_PROTOCOLS, \
+             _SOURCE -> LAYERS -> ETH -> SRC          AS ETH_SRC,    \
+             _SOURCE -> LAYERS -> ETH -> DST          AS ETH_DST,    \
+             _SOURCE -> LAYERS -> IP -> SRC           AS IP_SRC,     \
+             _SOURCE -> LAYERS -> IP -> DST           AS IP_DST,     \
+             _SOURCE -> LAYERS -> IP -> SRC_HOST      AS IP_SRC_HOST,\
+             _SOURCE -> LAYERS -> IP -> DST_HOST      AS IP_DST_HOST,\
+             _SOURCE -> LAYERS -> IP -> PROTO         AS IP_PROTO   \
+      FROM   PCAP;
+----
+
+11. Join the stream of PCAP data to the table of employees on the `watch list`: 
++
+[source,sql]
+----
+CREATE STREAM WATCHED_EMP_NETWORK_TRAFFIC AS \
+      SELECT * \
+      FROM PCAP_FLAT P \
+            INNER JOIN COMP_WATCH_BY_MACADDR_T C \
+            ON P.ETH_SRC = C.MACADDR;
+----
+
+12. View the joined stream of data: 
++
+[source,sql]
+----
+ksql> SELECT C_EMP_NAME, P_FRAME_PROTOCOLS, P_IP_DST FROM WATCHED_EMP_NETWORK_TRAFFIC;
+Tom Jones | eth:ethertype:ip:udp:bootp | 255.255.255.255
+Tom Jones | eth:ethertype:ip:udp:bootp | 255.255.255.255
+Tom Jones | eth:ethertype:arp | null
+Tom Jones | eth:ethertype:ip:tcp | 86.66.0.227
+Tom Jones | eth:ethertype:ip:icmp:data | 86.64.145.29
+Tom Jones | eth:ethertype:ip:tcp | 86.66.0.227
+Tom Jones | eth:ethertype:ip:tcp:http | 86.66.0.227
+Tom Jones | eth:ethertype:ip:tcp | 86.66.0.227
+----
+
+13. Optionally, filter the data further: 
++
+[source,sql]
+----
+ksql> SELECT C_EMP_NAME, P_FRAME_PROTOCOLS, P_IP_DST FROM WATCHED_EMP_NETWORK_TRAFFIC WHERE P_FRAME_PROTOCOLS LIKE '%http';
+Tom Jones | eth:ethertype:ip:tcp:http | 86.66.0.227
+Tom Jones | eth:ethertype:ip:tcp:http | 17.252.60.23
+Tom Jones | eth:ethertype:ip:tcp:http | 10.5.60.53
+----
++
+Press Ctrl-C to cancel the `SELECT` statement
