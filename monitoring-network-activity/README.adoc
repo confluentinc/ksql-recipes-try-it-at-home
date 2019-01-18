@@ -101,6 +101,12 @@ CREATE TABLE COMP_WATCH_BY_EMP_ID_T \
             ON c.empkey = e.key \
       WHERE e.watch_flag='YES';
 ----
+Verify that data is flowing to the new `COMP_WATCH_BY_EMP_ID_T` table: 
++
+[source,sql]
+----
+SELECT * FROM COMP_WATCH_BY_EMP_ID_T LIMIT 1;
+----
 
 7. We will be joining the `COMP_WATCH_T` table to a stream of events using the common key of `MACADDR`. The table currently is keyed on the key that was using in the join—employee ID. We need to re-key the data on `MACADDR` instead.
 +
@@ -126,33 +132,6 @@ CREATE TABLE COMP_WATCH_BY_MACADDR_T WITH (VALUE_FORMAT='AVRO', \
                                            KEY='MACADDR',\
                                            KAFKA_TOPIC='COMP_WATCH_BY_MACADDR_S');
 ----
-
-8. Optionally, observe that the two versions of the `COMP_WATCH` table are identical except the column on which they are keyed: 
-+
-[source,sql]
-----
-ksql> DESCRIBE EXTENDED COMP_WATCH_BY_EMP_ID_T;
-
-Name                 : COMP_WATCH_BY_EMP_ID_T2B
-Type                 : TABLE
-Key field            : EMP_ID
-Key format           : STRING
-Timestamp field      : Not set - using <ROWTIME>
-Value format         : AVRO
-Kafka topic          : COMP_WATCH_BY_EMP_ID_T (partitions: 4, replication: 1)
-
-
-ksql> DESCRIBE EXTENDED COMP_WATCH_BY_MACADDR_T;
-
-Name                 : COMP_WATCH_BY_MACADDR_T
-Type                 : TABLE
-Key field            : MACADDR
-Key format           : STRING
-Timestamp field      : Not set - using <ROWTIME>
-Value format         : AVRO
-Kafka topic          : COMP_WATCH_BY_MACADDR_S (partitions: 1, replication: 1)
-----
-
 
 9. Register a KSQL stream on the `pcap` Kafka topic. The schema has many columns; only a subset are declared here. This is a valid approach to take with KSQL, and it will just ignore columns that are not declared. 
 +
