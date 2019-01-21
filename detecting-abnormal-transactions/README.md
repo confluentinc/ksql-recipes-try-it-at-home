@@ -21,7 +21,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
 
 ## Try it at home!
 
-1. Clone this repository
+1. Clone this repository:
 
         git clone https://github.com/confluentinc/ksql-recipes-try-it-at-home.git
 
@@ -43,7 +43,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
                                                 KAFKA_TOPIC = 'suspicious-accounts', \
                                                 VALUE_FORMAT = 'JSON');
 
-5. Register the existing `txns-1` topic for use as a KSQL Stream called `TXNS`. The transaction information includes the identifier, the user sending the money, and the name of the recipient. 
+5. Register the existing `txns-1` topic for use as a KSQL stream called `TXNS`. The transaction information includes the identifier, the user sending the money and the name of the recipient: 
 
         CREATE STREAM TXNS (TXN_ID BIGINT, \
                             USERNAME VARCHAR, \
@@ -52,7 +52,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
                       WITH (KAFKA_TOPIC = 'txns-1', \
                             VALUE_FORMAT = 'JSON');
 
-6. Set KSQL to process data from the beginning of each Kafka topic
+6. Set KSQL to process data from the beginning of each Kafka topic:
 
         SET 'auto.offset.reset'='earliest';
 
@@ -72,7 +72,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
         Limit Reached
         Query terminated        
 
-7. Using the list of suspicious destination names for transactions, create a new stream of events containing transactions that were sent to an account name contained in the `SUSPICIOUS_NAMES` list
+7. Using the list of suspicious destination names for transactions, create a new stream of events containing transactions that were sent to an account name contained in the `SUSPICIOUS_NAMES` list:
 
         CREATE STREAM SUSPICIOUS_TXNS AS \
         SELECT T.TXN_ID, T.USERNAME, T.RECIPIENT, T.AMOUNT \
@@ -101,7 +101,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
         Limit Reached
         Query terminated
 
-9. Use a tumbling window create a table of accounts (`USERNAME`) against which there are more than three suspicious transactions within a 24 hour window: 
+9. Use a tumbling window create a table of accounts (`USERNAME`) against which there are more than three suspicious transactions within a 24-hour window: 
 
         CREATE TABLE ACCOUNTS_TO_MONITOR AS \
         SELECT TIMESTAMPTOSTRING(WindowStart(), 'yyyy-MM-dd HH:mm:ss Z') AS WINDOW_START, \
@@ -121,7 +121,7 @@ There will normally be a group of such transactions that occur within a 24-hour 
         ACCOUNTS_TO_MONITOR  | true       | 4          | 1                  | 0         | 0
         …
 
-    The KSQL table (and thus Kafka topic) contains a list of accounts against which more than 3 suspicious transactions have taken place in a 24 hour window. The window start time is included in the Kafka message: 
+    The KSQL table (and thus Kafka topic) contains a list of accounts against which more than three suspicious transactions have taken place within a 24-hour window. The window start time is included in the Kafka message: 
 
         ksql> SELECT WINDOW_START, USERNAME, TXN_COUNT FROM ACCOUNTS_TO_MONITOR;
         2019-01-10 00:00:00 +0000 | alan jones | 6
