@@ -1,4 +1,4 @@
-= Flattening JSON Messages 
+= Flattening JSON Kafka Messages
 
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/flattening-json-messages
 
