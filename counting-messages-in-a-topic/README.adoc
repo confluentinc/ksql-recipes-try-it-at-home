@@ -1,6 +1,6 @@
 = Counting messages in a topic
 
-See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/counting-messages-in-a-topic
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/counting-messages-topic
 
 == Introduction
 
