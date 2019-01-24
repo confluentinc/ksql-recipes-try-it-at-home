@@ -20,7 +20,7 @@ Let's assume you have some customer profile data in a compacted topic. The messa
 ----
 
 Now obviously, this is important customer information that we are keeping track of for various applications. Since this is a compacted topic, we expect a single message for each key with few exceptions depending on the how often we clean up our partitions segments. 
-In our example above, the key is `19` and the value is our JSON VARCHAR. This is all great, but one of our developers has asked how many customers we have in this topic. It doesn't have to be exact because they are just trying to understand how much memory would be required if they store all of the customers in their application. 
+In our example above, the key is `19` and the value is our JSON string. This is all great, but one of our developers has asked how many customers we have in this topic. It doesn't have to be exact because they are just trying to understand how much memory would be required if they store all of the customers in their application. 
 
 
 == Pre-reqs: 
@@ -76,7 +76,7 @@ CREATE STREAM customer_profile (\
                   VALUE_FORMAT = 'JSON');
 ----
 
-5. Change the auto.offset.reset parameter:
+5. Change the `auto.offset.reset` parameter:
 +
 [source,sql]
 ----
