@@ -1,6 +1,6 @@
 = Flattening JSON Kafka Messages
 
-See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/flattening-json-messages
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/flattening-json-kafka-messages
 
 == Introduction
 
