@@ -76,7 +76,7 @@ CREATE STREAM customer_profile (\
                   VALUE_FORMAT = 'JSON');
 ----
 
-5. Change the `auto.offset.reset` parameter:
+5. Change the `auto.offset.reset` parameter so KSQL will read from the beginning of the topic:
 +
 [source,sql]
 ----
