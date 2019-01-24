@@ -4,7 +4,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/counting-mes
 
 == Introduction
 
-At some point in your journey with Apache Kafka®, you might ask, "How many messages are in that topic?" You know enough to avoid using just the latest offset— because it's possible messages at lower offsets have since been deleted.  For an active topic, the number of messages is constantly changing and thus may have little value, but in some cases, even a rough estimate is good enough. There are also times where stricter validation is necessary. 
+At some point in your journey with Apache Kafka®, you might ask, "How many messages are in that topic?" You know enough to avoid using just the latest offset—because it's possible messages at lower offsets have since been deleted.  For an active topic, the number of messages is constantly changing and thus may have little value, but in some cases, even a rough estimate is good enough. There are also times where stricter validation is necessary. 
 
 For instance, say you have a failover scenario using https://www.confluent.io/confluent-replicator/[Confluent Replicator]. It might be important to know how many messages were in the source topic before cutting back over if messages were produced on the destination cluster during the downtime. Any client can be programmed to do this count for you, but KSQL makes it really easy and gives you access to filters if there are specific types of message that you want to count.
 
@@ -19,7 +19,7 @@ Let's assume you have some customer profile data in a compacted topic. The messa
     "fav_movie":"Return Of The Ghostbusters"}
 ----
 
-Now obviously, this is important customer information that we are keeping track of for various applications. Since this is a compacted topic we expect a single message for each key with few exceptions depending on the how often we clean up our partitions segments. 
+Now obviously, this is important customer information that we are keeping track of for various applications. Since this is a compacted topic, we expect a single message for each key with few exceptions depending on the how often we clean up our partitions segments. 
 In our example above, the key is `19` and the value is our JSON VARCHAR. This is all great, but one of our developers has asked how many customers we have in this topic. It doesn't have to be exact because they are just trying to understand how much memory would be required if they store all of the customers in their application. 
 
 
@@ -93,7 +93,7 @@ CREATE STREAM customer_profile_count AS \
       FROM customer_profile;
 ----
 
-7. Run a SELECT statement to sum our derived column and count the messages:
+7. Run a `SELECT` statement to sum our derived column and count the messages:
 +
 [source,sql]
 ----
