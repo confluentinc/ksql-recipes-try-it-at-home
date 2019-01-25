@@ -60,7 +60,7 @@ git clone https://github.com/confluentinc/ksql-recipes-try-it-at-home.git
 +
 [source,bash]
 ----
-cd ksql-recipes-try-it-at-home/flattening-json-messages
+cd ksql-recipes-try-it-at-home/flattening-json-kafka-messages
 docker-compose up -d
 ----
 
