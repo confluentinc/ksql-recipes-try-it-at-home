@@ -14,7 +14,7 @@ This repository contains all you need to try out the KSQL recipes yourself. All 
 * link:detecting-abnormal-transactions[Detecting Abnormal Transactions]
 * link:detecting-unusual-card-activity[Detecting Unusual Credit Card Activity]
 * link:enriching-streams-static-json-file-loaded-table[Enriching Streams with Static Data Loaded as a Table]
-* link:flattening-json-messages[Flattening JSON Messages with KSQL]
+* link:flattening-json-kafka-messages[Flattening JSON Kafka Messages]
 * link:heterogeneous-json-structures[Heterogeneous JSON Structures]
 * link:monitoring-network-activity[Monitoring Network Activity by User]
 * link:nested-json-data[Working with Nested JSON Data]
