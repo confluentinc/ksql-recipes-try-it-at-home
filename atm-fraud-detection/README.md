@@ -121,4 +121,4 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/atm-fraud-de
 # Further reading: 
 
 * Blog: [ATM Fraud Detection with Apache Kafka and KSQL](https://www.confluent.io/blog/atm-fraud-detection-apache-kafka-ksql)
-* [Full code sample with data generator, database lookups and Elasticsearch/Kibana visualisation](https://github.com/confluentinc/demo-scene/blob/master/ksql-atm-fraud-detection/ksql-atm-fraud-detection.adoc)
+* [Full code sample with data generator, database lookups and Elasticsearch/Kibana visualisation](https://github.com/confluentinc/demo-scene/blob/master/ksql-atm-fraud-detection/ksql-atm-fraud-detection-README.adoc)
