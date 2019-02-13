@@ -1,0 +1,102 @@
+---
+version: '2'
+services:
+  zookeeper:
+    image: "confluentinc/cp-zookeeper:5.1.1"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: "confluentinc/cp-enterprise-kafka:5.1.1"
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+    command: 
+      - bash 
+      - -c 
+      - |
+        rm /data/kafka-is-up
+        # Launch Kafka
+        /etc/confluent/docker/run &
+        # Wait for Kafka to start and then create a file to 
+        # indicate that it's listening
+        echo "Waiting for Kafka to start listening on 9092 ⏳"
+        nc -vz localhost 9092
+        is_up=$$?
+        while [ $$is_up -ne 0 ] ; do 
+          echo -e $$(date) $$(nc -z localhost 9092)
+          nc -vz localhost 9092
+          is_up=$$?
+          sleep 5 
+        done
+        echo "Kakfa is now listening! :-)"
+        touch /data/kafka-is-up
+        sleep infinity
+    volumes:
+      - up-flag:/data
+
+  schema-registry:
+    image: "confluentinc/cp-schema-registry:5.1.1"
+    depends_on:
+      - kafka
+    ports:
+      - '8081:8081'
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+
+  ksql-server:
+    image: confluentinc/cp-ksql-server:5.1.1
+    depends_on:
+      - kafka
+      - schema-registry
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka:29092
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KSQL_KSQL_SERVICE_ID: confluent_rmoff_01
+
+  ksql-cli:
+    image: confluentinc/cp-ksql-cli:5.1.1
+    depends_on:
+      - ksql-server
+    entrypoint: /bin/sh
+    tty: true
+
+  kafkacat:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    command: 
+      - bash 
+      - -c 
+      - |
+        echo "Waiting for flag that Kafka is up… ⏳"
+        until [ -f /data/flags/kafka-is-up ]
+        do
+            echo -e $$(date) ": Waiting for flag that Kafka is up… ⏳"
+            sleep 5
+        done
+        echo -e $$(date) ": \o/ Got the flag that Kafka is up!"
+        while [ 1 -eq 1 ]
+          do 
+            tar -xzf /data/winlogbeat.json.tar.gz | awk '{print $$0;system("sleep 0.5");}' | \
+              kafkacat -b kafka:29092 -P -t winlogbeat
+          done
+    volumes: 
+      - $PWD:/data
+      - up-flag:/data/flags
+
+volumes:
+    up-flag: {}

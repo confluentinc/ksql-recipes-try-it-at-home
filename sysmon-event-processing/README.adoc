@@ -92,6 +92,19 @@ ksql> CREATE STREAM WINLOGBEAT_STREAM \
             event_id INTEGER) \
 WITH (KAFKA_TOPIC='winlogbeat', VALUE_FORMAT='JSON');
 ----
++
+Optionally, query a sample of the data: 
++
+[source,sql]
+----
+ksql> SELECT SOURCE_NAME , COMPUTER_NAME , EVENT_DATA->PARENTIMAGE, EVENT_DATA->PRODUCT  \
+        FROM WINLOGBEAT_STREAM \
+        WHERE EVENT_ID =1 OR EVENT_ID = 3 \
+        LIMIT 2;
+Microsoft-Windows-Sysmon | MSEDGEWIN10 | C:\Windows\System32\svchost.exe | Microsoft® Windows® Operating System
+Microsoft-Windows-Sysmon | MSEDGEWIN10 | C:\Windows\System32\wuauclt.exe | Microsoft Malware Protection
+----
+
 
 5. Rekey the `WINLOGBEAT_STREAM` stream so that the key is correct for subsequent join operations. The rekey is on the `process_guid` field since that’s the common property with a unique value between Sysmon events 1 and 3. It's done using the `PARTITION BY` command. 
 +
@@ -141,6 +154,7 @@ ksql> CREATE STREAM WINLOGBEAT_STREAM_REKEY \
     FROM WINLOGBEAT_STREAM \
     WHERE source_name='Microsoft-Windows-Sysmon' \
     PARTITION BY process_guid;
+----
 
 5. Using the rekeyed stream, create a stream with just the Sysmon `ProcessCreate` events (`event_id=1`): 
 +
@@ -175,8 +189,19 @@ ksql> CREATE STREAM SYSMON_PROCESS_CREATE \
             FROM WINLOGBEAT_STREAM_REKEY \
             WHERE event_id=1;
 ----
++
+Optionally, query a sample of this data. Note that it is just `ProcessCreate` events. 
++
+[source,sql]
+----
+ksql> SELECT PROCESS_PATH, FILE_DESCRIPTION, USER_ACCOUNT  \
+        FROM SYSMON_PROCESS_CREATE \
+        LIMIT 2;
+C:\Windows\System32\wuauclt.exe | Windows Update | NT AUTHORITY\SYSTEM
+C:\Windows\SoftwareDistribution\Download\Install\AM_Engine_Patch_1.1.15500.2.exe | AntiMalware Definition Update | NT AUTHORITY\SYSTEM
+----
 
-6. From this derived Sysmon `ProcessCreate` stream (and underlying topic), now declare a KSQL table. We define the Sysmon ProcessCreate events as a table because for each key (process_guid), we want to know its current values (process_name, process_command_line, hashes, etc.) for when we subsequently join them with `NetworkCreate` events that have the same process_guid value.
+6. From this derived Sysmon `ProcessCreate` stream (and underlying topic), now declare a KSQL table. We define the Sysmon `ProcessCreate` events as a table because for each key (`process_guid`), we want to know its current values (process_name, process_command_line, hashes, etc.) for when we subsequently join them with `NetworkCreate` events that have the same process_guid value.
 +
 [source,sql]
 ----
@@ -239,6 +264,15 @@ ksql> CREATE STREAM SYSMON_NETWORK_CONNECT \
             FROM WINLOGBEAT_STREAM_REKEY \
             WHERE event_id=3;
 ----
++
+Optionally, query a sample of this data. Note that it is just `NetworkConnect` events. 
++
+[source,sql]
+----
+ksql> SELECT PROCESS_PATH , SRC_HOST_NAME , DST_IP_ADDR   FROM SYSMON_NETWORK_CONNECT LIMIT 20;
+C:\Windows\System32\svchost.exe | MSEDGEWIN10.moffatt.me | 40.77.229.141
+C:\Windows\System32\svchost.exe | MSEDGEWIN10.moffatt.me | 104.103.114.93
+----
 
 6. Join the `NetworkConnect` event stream with the lookups against the `ProcessCreate`. This enriched stream is persisted to a new Kafka topic called `SYSMON_JOIN`.
 +
@@ -278,4 +312,18 @@ ksql> CREATE STREAM SYSMON_JOIN WITH (PARTITIONS=1) AS \
         FROM SYSMON_NETWORK_CONNECT N \
                 INNER JOIN SYSMON_PROCESS_CREATE_TABLE P \
                 ON N.PROCESS_GUID = P.PROCESS_GUID;
+----
+Optionally, query a sample of the joined data. Note that for each network event you have information about the process responsible:
++
+[source,sql]
+----
+ksql> SELECT TIMESTAMPTOSTRING(ROWTIME,'yyyy-MM-dd HH:mm:ss'), SRC_HOST_NAME , DST_IP_ADDR , \
+             PROCESS_COMMAND_LINE , PARENT_PROCESS_COMMAND_LINE , N_USER_ACCOUNT  \
+        FROM SYSMON_JOIN;
+2019-02-13 10:58:30 | MSEDGEWIN10.moffatt.me | 40.83.74.46 | c:\windows\system32\svchost.exe -k netsvcs -p -s PushToInstall | C:\Windows\system32\services.exe | NT AUTHORITY\SYSTEM
+2019-02-13 10:59:54 | MSEDGEWIN10.moffatt.me | 2.21.186.132 | c:\windows\system32\svchost.exe -k unistacksvcgroup -s WpnUserService | C:\Windows\system32\services.exe | MSEDGEWIN10\IEUser
+2019-02-13 11:00:10 | MSEDGEWIN10.moffatt.me | 204.79.197.200 | "C:\Windows\system32\backgroundTaskHost.exe" -ServerName:CortanaUI.AppXy7vb4pc2dr3kc93kfc509b1d0arkfb2x.mca | C:\Windows\system32\svchost.exe
+2019-02-13 11:00:10 | MSEDGEWIN10.moffatt.me | 204.79.197.200 | "C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\SearchUI.exe" -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca |
+2019-02-13 11:00:27 | MSEDGEWIN10.moffatt.me | 13.107.3.128 | "C:\Program Files\WindowsApps\Microsoft.MicrosoftOfficeHub_17.10314.31700.1000_x64__8wekyb3d8bbwe\Office16\OfficeHubTaskHost.exe" -ServerName:M
+2019-02-13 11:00:42 | MSEDGEWIN10.moffatt.me | 2.21.186.81 | "C:\Users\IEUser\AppData\Local\Microsoft\OneDrive\OneDrive.exe" /background | C:\Windows\Explorer.EXE | MSEDGEWIN10\IEUser
 ----
