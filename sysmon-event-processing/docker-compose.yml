@@ -91,8 +91,8 @@ services:
         echo -e $$(date) ": \o/ Got the flag that Kafka is up!"
         while [ 1 -eq 1 ]
           do 
-            tar -xzf /data/winlogbeat.json.tar.gz | awk '{print $$0;system("sleep 0.5");}' | \
-              kafkacat -b kafka:29092 -P -t winlogbeat
+            tar --to-stdout --gunzip --extract -f /data/winlogbeat.json.tar.gz | awk '{print $$0;system("sleep 0.5");}' | \
+              kafkacat -b kafka:29092 -P -t winlogbeat -K:
           done
     volumes: 
       - $PWD:/data

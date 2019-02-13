@@ -46,6 +46,13 @@ docker-compose up -d
 docker-compose exec ksql-cli ksql http://ksql-server:8088
 ----
 
+3. Configure KSQL to process all data that exists in a topic (and not just from the current point onwards, which is the default)
++
+[source,sql]
+----
+ksql> SET 'auto.offset.reset' = 'earliest';
+----
+
 4. Register the Kafka topic that contains Sysmon event logs as a stream and name it `WINLOGBEAT_STREAM`. In this case, the available Kafka topic was named `winlogbeat`. Remember that we are performing a join between Sysmon events 1 and 3, and the data is in JSON format. Therefore, we only need to specify the column names of the two Sysmon events (1 and 3) and define nested fields via the STRUCT data type.
 +
 [source,sql]
@@ -269,7 +276,9 @@ Optionally, query a sample of this data. Note that it is just `NetworkConnect` e
 +
 [source,sql]
 ----
-ksql> SELECT PROCESS_PATH , SRC_HOST_NAME , DST_IP_ADDR   FROM SYSMON_NETWORK_CONNECT LIMIT 20;
+ksql> SELECT PROCESS_PATH , SRC_HOST_NAME , DST_IP_ADDR \
+        FROM SYSMON_NETWORK_CONNECT \
+        LIMIT 2;
 C:\Windows\System32\svchost.exe | MSEDGEWIN10.moffatt.me | 40.77.229.141
 C:\Windows\System32\svchost.exe | MSEDGEWIN10.moffatt.me | 104.103.114.93
 ----
