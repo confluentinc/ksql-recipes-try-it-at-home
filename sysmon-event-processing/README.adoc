@@ -8,23 +8,23 @@ KSQL can be used to process and enrich security events in real time, providing e
 
 In this recipe, we will show you how to join two specific Sysmon events in order to expedite the analysis of data and provide more context to the data collected while hunting for specific adversarial techniques.
 
-== Pre-reqs: 
+== Prereqs: 
 
 * Docker
-* If running on Mac/Windows, at least 4GB allocated to Docker: 
+* If running on Mac/Windows, allocate at least 4 GB to Docker: 
 +
 [source,bash]
 ----
 docker system info | grep Memory 
 ----
 +
-_Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
+_It should return a value greater than 8 GB - if not, the Apache Kafka<sup>®</sup> stack will probably not work._
 
 == Try it at home!
 
-Minimum version is Confluent Platform 5.0
+Minimum version: Confluent Platform 5.0
 
-1. Clone this repository
+1. Clone this repository:
 +
 [source,bash]
 ----
@@ -46,7 +46,7 @@ docker-compose up -d
 docker-compose exec ksql-cli ksql http://ksql-server:8088
 ----
 
-3. Configure KSQL to process all data that exists in a topic (and not just from the current point onwards, which is the default)
+3. Configure KSQL to process all data that exists in a topic (and not just from the current point onwards, which is the default):
 +
 [source,sql]
 ----
@@ -208,7 +208,7 @@ C:\Windows\System32\wuauclt.exe | Windows Update | NT AUTHORITY\SYSTEM
 C:\Windows\SoftwareDistribution\Download\Install\AM_Engine_Patch_1.1.15500.2.exe | AntiMalware Definition Update | NT AUTHORITY\SYSTEM
 ----
 
-6. From this derived Sysmon `ProcessCreate` stream (and underlying topic), now declare a KSQL table. We define the Sysmon `ProcessCreate` events as a table because for each key (`process_guid`), we want to know its current values (process_name, process_command_line, hashes, etc.) for when we subsequently join them with `NetworkCreate` events that have the same process_guid value.
+6. From this derived Sysmon `ProcessCreate` stream (and underlying topic), now declare a KSQL table. We define the Sysmon `ProcessCreate` events as a table because for each key (`process_guid`), we want to know its current values (process_name, process_command_line, hashes, etc.) for when we subsequently join them with `NetworkCreate` events that have the same `process_guid` value.
 +
 [source,sql]
 ----
