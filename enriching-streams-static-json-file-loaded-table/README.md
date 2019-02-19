@@ -2,19 +2,19 @@
 
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/enriching-streams-static-json-file-loaded-table
 
-## Pre-reqs: 
+## Prereqs: 
 
 * Docker
-* If running on Mac/Windows, at least 4GB allocated to Docker: 
+* If running on Mac/Windows, at least 4 GB allocated to Docker: 
 
       docker system info | grep Memory 
 
-    _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
+    _It should return a value greater than 8 GB—if not, the Kafka stack will probably not work._
 
 
 ## Try it at home!
 
-1. Clone this repository
+1. Clone this repository:
 
         git clone https://github.com/confluentinc/ksql-recipes-try-it-at-home.git
 
