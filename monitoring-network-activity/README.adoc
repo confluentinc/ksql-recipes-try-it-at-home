@@ -6,7 +6,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/monitoring-n
 
 PCAP data is low-level data about network activity. PCAP data can be created from https://www.wireshark.org/[Wireshark] and its command line counterpart https://www.wireshark.org/docs/man-pages/tshark.html[tshark] 
 
-Using PCAP data, you can identify and monitor the behavior of applications and users on devices. This recipe is an example of how to filter PCAP data by media access control (MAC) address. The MAC address on which to filter is derived from tables of employees and their computers. Employees with a "watch" flag against them will have their associated computer's MAC address used in the filter of the PCAP data. 
+Using PCAP data, you can identify and monitor the behavior of applications and users on devices. This recipe is an example of how to filter PCAP data by MAC address. The MAC address on which to filter is derived from tables of employees and their computers. Employees with a "watch" flag against them will have their associated computer's MAC address used in the filter of the PCAP data. 
 
 image::overview.png[]
 
