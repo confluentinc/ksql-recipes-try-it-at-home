@@ -4,32 +4,32 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/monitoring-n
 
 == Introduction
 
-PCAP data is low-level data about network activity. PCAP data can be created from https://www.wireshark.org/[Wireshark] and its command line counterpart https://www.wireshark.org/docs/man-pages/tshark.html[tshark] 
+PCAP data is low-level data about network activity. PCAP data can be created from https://www.wireshark.org/[Wireshark] and its commandline counterpart https://www.wireshark.org/docs/man-pages/tshark.html[tshark] 
 
-Using PCAP data, you can identify and monitor the behavior of applications and users on devices. This recipe is an example of how to filter PCAP data by MAC address. The MAC address on which to filter is derived from tables of employees and their computers. Employees with a "watch" flag against them will have their associated computer's MAC address used in the filter of the PCAP data. 
+Using PCAP data you can identify and monitor the behavior of applications and users on devices. This recipe is an example of how to filter PCAP data by MAC address. The MAC address on which to filter is derived from tables of employees and their computers. Employees with a 'watch' flag against them will have their associated computer's MAC address used in the filter of the PCAP data. 
 
 image::overview.png[]
 
 The resulting filtered stream of network activity can be used for monitoring and aggregated reports. 
 
-== Prereqs: 
+== Pre-reqs: 
 
 * Docker
-* If running on Mac/Windows, at least 4 GB allocated to Docker: 
+* If running on Mac/Windows, at least 4GB allocated to Docker: 
 +
 [source,bash]
 ----
 docker system info | grep Memory 
 ----
 +
-_It should return a value greater than 8 GB—if not, the Kafka stack will probably not work._
+_Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
 
 == Try it at home!
 
-Minimum version is Confluent Platform 5.0.1
+Minimum version is Confluent Platform 5.0
 
-1. Clone this repository:
+1. Clone this repository
 +
 [source,bash]
 ----
@@ -79,7 +79,7 @@ CREATE TABLE computer_t \
 
 5. Change a couple of system settings: 
 +
-* Any processing is to be done on the existing contents of a Kafka topic, not just new records
+* Any processing is to done on the existing contents of a Kafka topic, not just new records
 * When creating target topic, use one partition instead of the default four
 +
 [source,sql]
@@ -88,9 +88,9 @@ SET 'auto.offset.reset' = 'earliest';
 SET 'ksql.sink.partitions'='1';
 ----
 
-6. Create a new table showing the computer details for each employee who has been put on a "watch list." 
+6. Create a new table showing the computer details for each employee who has been put on a 'watch list'. 
 +
-_Note that https://github.com/confluentinc/ksql/issues/1559[table-table joins are currently 1:1], not 1:N._
+_Note that table-table joins are https://github.com/confluentinc/ksql/issues/1559[currently] 1:1, not 1:N._
 +
 [source,sql]
 ----
@@ -112,7 +112,7 @@ Verify that data is flowing to the new `COMP_WATCH_BY_EMP_ID_T` table:
 SELECT * FROM COMP_WATCH_BY_EMP_ID_T LIMIT 1;
 ----
 
-7. We will be joining the `COMP_WATCH_T` table to a stream of events using the common key of `MACADDR`. The table currently is keyed on the key that was being used in the join—employee ID. We need to re-key the data on `MACADDR` instead.
+7. We will be joining the `COMP_WATCH_T` table to a stream of events using the common key of `MACADDR`. The table currently is keyed on the key that was using in the join—employee ID. We need to re-key the data on `MACADDR` instead.
 +
 [source,sql]
 ----
@@ -292,4 +292,4 @@ Tom Jones | eth:ethertype:ip:tcp:http | 17.252.60.23
 Tom Jones | eth:ethertype:ip:tcp:http | 10.5.60.53
 ----
 +
-Press Ctrl-C to cancel the `SELECT` statement.
+Press Ctrl-C to cancel the `SELECT` statement
