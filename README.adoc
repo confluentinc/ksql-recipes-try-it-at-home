@@ -1,4 +1,4 @@
-= KSQL Recipes - try it at home!
+= KSQL Recipes – Try it at home!
 
 image::images/ksql-rocket.svg[KSQL Rocket]
 
@@ -17,7 +17,7 @@ This repository contains all you need to try out the KSQL recipes yourself. All 
 * link:flattening-json-kafka-messages[Flattening JSON Kafka Messages]
 * link:heterogeneous-json-structures[Heterogeneous JSON Structures]
 * link:monitoring-network-activity[Monitoring Network Activity by User]
-* link:nested-json-data[Working with Nested JSON Data]
-* link:setting-kafka-message-key[Setting the Kafka Message Key]
 * link:syslog-pattern-detection-alerting[Processing Syslog Data: Pattern Detection and Alerting]
-
+* link:setting-kafka-message-key[Setting the Kafka Message Key]
+* link:sysmon-event-processing[Sysmon Event Processing]
+* link:nested-json-data[Working with Nested JSON Data]
