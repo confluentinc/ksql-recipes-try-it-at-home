@@ -1,6 +1,8 @@
+# Working with Nested JSON Data
+
 See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/nested-json-data
 
-# Pre-reqs: 
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -10,7 +12,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/nested-json-
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
 
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 
@@ -18,7 +20,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/nested-json-
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/nested-data
+        cd ksql-recipes-try-it-at-home/nested-json-data
         docker-compose up -d
 
 3. Run KSQL CLI:

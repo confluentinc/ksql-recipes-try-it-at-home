@@ -1,6 +1,8 @@
+# Aggregating Data
+
 See https://www.confluent.io/stream-processing-cookbook/ksql-recipes/aggregating-data
 
-# Pre-reqs: 
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -10,7 +12,7 @@ See https://www.confluent.io/stream-processing-cookbook/ksql-recipes/aggregating
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
 
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 
@@ -18,7 +20,7 @@ See https://www.confluent.io/stream-processing-cookbook/ksql-recipes/aggregating
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/data-aggregation
+        cd ksql-recipes-try-it-at-home/aggregating-data
         docker-compose up -d
 
 3. Run KSQL CLI:

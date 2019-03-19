@@ -1,0 +1,104 @@
+= Calculating Bus Delay Time
+
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/calculating-bus-delay-time
+
+== Introduction
+
+Many events happen on a time schedule where there is a scheduled time of arrival and an actual time of arrival. With these two data points, you are able to track the amount of time in which your event was delayed. By tracking this, you can better predict future delays and monitor your real-time progress. 
+
+In this example, we will use buses to demonstrate how we can calculate in real time the delays for every bus as it executes its route. After loading your static bus schedule into a KTable, you can then populate a live feed showing the number of minutes a bus is delayed from its expected course.
+
+
+== Pre-reqs: 
+
+* Docker
+* If running on Mac/Windows, at least 4GB allocated to Docker: 
++
+[source,bash]
+----
+docker system info | grep Memory 
+----
++
+_Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
+
+
+== Try it at home!
+
+Minimum version is Confluent Platform 4.1
+
+1. Clone this repository
++
+[source,bash]
+----
+git clone https://github.com/confluentinc/ksql-recipes-try-it-at-home.git
+----
+
+2. Launch: 
++
+[source,bash]
+----
+cd ksql-recipes-try-it-at-home/calculating-bus-delay-time
+docker-compose up -d
+----
+
+3. Run KSQL CLI:
++
+[source,bash]
+----
+docker-compose exec ksql-cli ksql http://ksql-server:8088
+----
+
+4. The bus schedule with expected arrival times is held as JSON data on a Kafka topic, with the ETA stored as a Unix timestamp. Register a KSQL table on this topic: 
++
+[source,sql]
+----
+CREATE TABLE BUS_SCHEDULE (ROUTE_ID INTEGER, \
+                           STOP_NUM INTEGER, \
+                           ETA BIGINT) \
+                     WITH (VALUE_FORMAT='JSON', \
+                           KAFKA_TOPIC='bus-sched', \
+                          KEY='STOP_NUM');
+----
+
+5. As buses complete their routes, they send events detailing the Unix timestamp of their arrival at a stop to a Kafka topic. Register this topic as a KSQL stream: 
++
+[source,sql]
+----
+CREATE STREAM BUS_EVENTS (BUS_ID INTEGER, \
+                          ROUTE_ID INTEGER, \
+                          TIMESTAMP BIGINT, \
+                          LAST_STOP INTEGER) \
+                    WITH (VALUE_FORMAT='JSON', \
+                          KAFKA_TOPIC='bus-events');
+----
+
+6. Configure KSQL to read all data from the beginning of a topic: 
++
+[source,sql]
+----
+SET 'auto.offset.reset'='earliest';
+----
+
+7. Show a live feed of the number of minutes a bus is delayed from its expected course based on the route and stop number:
++
+[source,sql]
+----
+SELECT 'Bus: ' + CAST(EV.BUS_ID AS VARCHAR), \
+       'Route: ' + CAST(EV.ROUTE_ID AS VARCHAR), \
+       'Stop: ' + CAST(SCH.STOP_NUM AS VARCHAR), \
+       'Due: ' + TIMESTAMPTOSTRING(SCH.ETA, 'yyyy-MM-dd  HH:mm:ss Z') AS ETA, \
+       'Actual: ' + TIMESTAMPTOSTRING(EV.TIMESTAMP, 'HH:mm:ss Z') AS ACTUAL_TIME, \
+       'Difference (minutes): ' + CAST((EV.TIMESTAMP-SCH.ETA)/1000/60 AS VARCHAR) AS MINUTES_DELAYED \
+  FROM BUS_EVENTS EV \
+       LEFT OUTER JOIN \
+         BUS_SCHEDULE SCH \
+         ON EV.LAST_STOP = SCH.STOP_NUM \
+WHERE  EV.ROUTE_ID = SCH.ROUTE_ID;
+----
++
+[source,sql]
+----
+Bus: 1 | Route: 1 | Stop: 0 | Due: 2019-01-01  10:00:00 +0000 | Actual: 10:00:00 +0000 | Difference (minutes): 0
+Bus: 1 | Route: 1 | Stop: 1 | Due: 2019-01-01  10:10:00 +0000 | Actual: 10:12:00 +0000 | Difference (minutes): 2
+Bus: 1 | Route: 1 | Stop: 2 | Due: 2019-01-01  10:25:00 +0000 | Actual: 10:28:00 +0000 | Difference (minutes): 3
+----

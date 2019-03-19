@@ -1,6 +1,8 @@
-See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/create-composite-key
+# Creating a Composite Key
 
-# Pre-reqs: 
+See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/creating-composite-key
+
+## Pre-reqs: 
 
 * Docker
 * If running on Mac/Windows, at least 4GB allocated to Docker: 
@@ -9,7 +11,7 @@ See http://www.confluent.io/stream-processing-cookbook/ksql-recipes/create-compo
 
     _Should return a value greater than 8GB - if not, the Kafka stack will probably not work._
 
-# Setting Kafka message key using KSQL
+## Introduction
 
 Kafka messages are key/value pairs. The key is commonly used for partitioning and is particularly important if modeling a Kafka topic as a table in KSQL (or KTable in Kafka Streams) for query or join purposes. Sometimes you might want to set, or change, the message key to a _composite_ of two or more fields in the message payload. This is usually done in the absence of a surrogate key to enable unique identification of a data point. 
 
@@ -19,7 +21,7 @@ In this example there is a stream of data from IoT devices, with several fields 
 * `machine_id`
 * `metric_id`
 
-# Try it at home!
+## Try it at home!
 
 1. Clone this repository
 
@@ -27,7 +29,7 @@ In this example there is a stream of data from IoT devices, with several fields 
 
 2. Launch: 
 
-        cd ksql-recipes-try-it-at-home/create-composite-key
+        cd ksql-recipes-try-it-at-home/creating-composite-key
         docker-compose up -d
 
 3. Run KSQL CLI:
