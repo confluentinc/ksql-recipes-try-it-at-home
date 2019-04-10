@@ -3,14 +3,14 @@ version: '2'
 services:
   zookeeper:
     container_name: zookeeper
-    image: "confluentinc/cp-zookeeper:5.0.1"
+    image: "confluentinc/cp-zookeeper:5.2.0"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
     container_name: kafka
-    image: "confluentinc/cp-enterprise-kafka:5.0.1"
+    image: "confluentinc/cp-enterprise-kafka:5.2.0"
     ports:
       - '9092:9092'
     depends_on:
@@ -33,7 +33,7 @@ services:
 
   # schema-registry:
   #   container_name: schema-registry
-  #   image: "confluentinc/cp-schema-registry:5.0.1"
+  #   image: "confluentinc/cp-schema-registry:5.2.0"
   #   depends_on:
   #     - kafka
   #   ports:
@@ -44,7 +44,7 @@ services:
 
   ksql-server:
     container_name: ksql-server  
-    image: confluentinc/cp-ksql-server:5.1.1
+    image: confluentinc/cp-ksql-server:5.2.0
     depends_on:
       - kafka
       # - schema-registry
@@ -71,7 +71,7 @@ services:
 
   ksql-cli:
     container_name: ksql-cli
-    image: confluentinc/cp-ksql-cli:5.1.1
+    image: confluentinc/cp-ksql-cli:5.2.0
     depends_on:
       - ksql-server
     entrypoint: /bin/sh
@@ -93,7 +93,7 @@ services:
       - $PWD:/data
 
   datagen:
-    image: confluentinc/ksql-examples:5.0.1
+    image: confluentinc/ksql-examples:5.2.0
     depends_on:
       - kafka
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
