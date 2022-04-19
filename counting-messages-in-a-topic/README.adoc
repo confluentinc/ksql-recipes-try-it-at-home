@@ -8,7 +8,7 @@ At some point in your journey with Apache Kafka®, you might ask, "How many mess
 
 For instance, say you have a failover scenario using https://www.confluent.io/confluent-replicator/[Confluent Replicator]. It might be important to know how many messages were in the source topic before cutting back over if messages were produced on the destination cluster during the downtime. Any client can be programmed to do this count for you, but KSQL makes it really easy and gives you access to filters if there are specific types of message that you want to count.
 
-Let's assume you have some customer profile data in a compacted topic. The messages in this topic might look something this:
+Now let's assume you have some customer profile data in a compacted topic. The messages in this topic might look something this:
 
 [source,json]
 ----
@@ -19,8 +19,8 @@ Let's assume you have some customer profile data in a compacted topic. The messa
     "fav_movie":"Return Of The Ghostbusters"}
 ----
 
-Now obviously, this is important customer information that we are keeping track of for various applications. Since this is a compacted topic, we expect a single message for each key with few exceptions depending on the how often we clean up our partitions segments. 
-In our example above, the key is `19` and the value is our JSON string. This is all great, but one of our developers has asked how many customers we have in this topic. It doesn't have to be exact because they are just trying to understand how much memory would be required if they store all of the customers in their application. 
+Now obviously, this is important customer information that we are keeping track of for various applications. Since this is a compacted topic, we expect a single message for each key with few exceptions depending on the how often we clean up our partition segments. 
+In our example above, the key is `19` and the value is our JSON string. This is all great, but one of our developers has asked how many customers we have in this topic. It doesn't have to be exact because they are just trying to understand how much memory would be required if they store all of the customers that have the favorite color "Green" in their application. 
 
 
 == Pre-reqs: 
@@ -83,14 +83,14 @@ CREATE STREAM customer_profile (\
 SET 'auto.offset.reset' = 'earliest';
 ----
 
-6. Create a new KSQL stream from our previous stream that includes some derived columns to `GROUP BY` and `SUM`:
+6. Create a new KSQL stream from our previous stream that includes some derived columns to `GROUP BY` and `COUNT`. We also have included a filter on `fav_color` to count only those with the favorite color `Green`:
 +
 [source,sql]
 ----
 CREATE STREAM customer_profile_count AS \
-      SELECT 'Records' AS field1,  \
-                     1 AS sum_this \
-      FROM customer_profile;
+      SELECT 'Like_Green' AS field1  \
+      FROM customer_profile
+      WHERE fav_color = 'Green';
 ----
 
 7. Run a `SELECT` statement to sum our derived column and count the messages:
@@ -98,11 +98,9 @@ CREATE STREAM customer_profile_count AS \
 [source,sql]
 ----
 SELECT   field1, \
-         SUM(sum_this) AS message_count \
+         COUNT(*) AS message_count \
 FROM     customer_profile_count \
 GROUP BY field1;
 ----
 
-As new messages come into the original topic, the message count will update and emit another output message. If you leave the `SELECT` statement running you will see this value increase as time passes because new messages are being added to the topic in the background. 
-
-A more complex use case might require a filter or join that could be applied at various steps. The same concept can be used for a non-compacted topic if the need should arise. 
+As new messages come into the original topic, the message count will update and emit another output message. If you leave the `SELECT` statement running you will see this value increase as time passes because new messages are being added to the topic in the background. The same counting concept can be used for a non-compacted topic if the need should arise. 
