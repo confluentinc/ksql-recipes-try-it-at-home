@@ -1,5 +1,9 @@
 = KSQL Recipes – Try it at home!
 
+DISCLAMER: This GH repo is out of date and being archived in favor of the newer recipes available at https://github.com/confluentinc/kafka-tutorials which materializes on https://developer.confluent.io/
+
+
+
 image::images/ksql-rocket.svg[KSQL Rocket]
 
 This repository contains all you need to try out the KSQL recipes yourself. All you need is Docker and Docker Compose! Each recipe includes the full details on how to run it. 
